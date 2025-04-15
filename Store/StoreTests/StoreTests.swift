@@ -35,6 +35,7 @@ Beans (8oz Can): $1.99
 ------------------
 TOTAL: $1.99
 """
+        NSLog(receipt.output())
         XCTAssertEqual(expectedReceipt, receipt.output())
     }
     
@@ -65,5 +66,26 @@ Granols Bars (Box, 8ct): $4.99
 TOTAL: $7.97
 """
         XCTAssertEqual(expectedReceipt, receipt.output())
+    }
+    
+    // Implemented Coupon extra credit
+    // Checks that discount is applied to Apple
+    func testAppleDiscount() {
+        register.scan(Item(name: "Apple", priceEach: 100))
+        
+        XCTAssertEqual(85, register.subtotal())
+    }
+    
+    // Checks that discount is only applied to Apple once
+    func testAppleDiscountAppliedOnlyOnce() {
+        register.scan(Item(name: "Apple", priceEach: 100))
+        register.scan(Item(name: "Apple", priceEach: 100))
+        
+        XCTAssertEqual(185, register.subtotal())
+    }
+    
+    func testDiscountNotAppliedToInvalidItems() {
+        register.scan(Item(name: "Matcha", priceEach: 100000))
+        XCTAssertEqual(100000, register.subtotal())
     }
 }
