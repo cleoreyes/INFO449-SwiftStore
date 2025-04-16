@@ -38,6 +38,39 @@ class TwoForOneScheme: PricingScheme {
     }
 }
 
+// extra credit: implemented grouped purchase scheme
+class GroupedPurchaseScheme: PricingScheme {
+    var itemName: String
+    private var pairedItemName: String
+    private var discountPercentage: Double
+    
+    init(itemName: String, pairedItemName: String, discountPercentage: Double = 0.1) {
+        self.itemName = itemName
+        self.pairedItemName = pairedItemName
+        self.discountPercentage = discountPercentage
+    }
+    
+    func applyDiscount(items: [SKU]) -> Int {
+        let hasFirstItem = items.contains { $0.name.contains(itemName) }
+        let hasSecondItem = items.contains { $0.name.contains(pairedItemName) }
+        
+        if hasFirstItem && hasSecondItem {
+            let firstItemsTotal = items
+                .filter { $0.name.contains(itemName) }
+                .reduce(0) { $0 + $1.price() }
+                
+            let secondItemsTotal = items
+                .filter { $0.name.contains(pairedItemName) }
+                .reduce(0) { $0 + $1.price() }
+            
+            let discountAmount = Int(Double(firstItemsTotal + secondItemsTotal) * discountPercentage)
+            return discountAmount
+        }
+        
+        return 0
+    }
+}
+
 class Item: SKU {
     let name: String
     var priceEach: Int

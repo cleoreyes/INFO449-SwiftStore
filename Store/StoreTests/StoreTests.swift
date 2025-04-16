@@ -119,4 +119,18 @@ TOTAL: $7.97
 
         XCTAssertEqual(199 * 4, register.subtotal())
     }
+
+    // extra credit: implemeted tested for group purchase discount
+    func testBasicGroupedPurchaseDiscount() {
+        register.addPricingScheme(GroupedPurchaseScheme(itemName: "Ketchup", pairedItemName: "Beer"))
+        
+        register.scan(Item(name: "Heinz Ketchup", priceEach: 300))
+        register.scan(Item(name: "Craft Beer", priceEach: 700))
+        
+        let totalBeforeDiscount = 300 + 700
+        let expectedDiscount = Int(Double(totalBeforeDiscount) * 0.1)
+        let expectedSubtotal = totalBeforeDiscount - expectedDiscount
+        
+        XCTAssertEqual(register.subtotal(), expectedSubtotal)
+    }
 }
