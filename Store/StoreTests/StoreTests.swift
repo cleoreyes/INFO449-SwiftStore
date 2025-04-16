@@ -8,15 +8,15 @@
 import XCTest
 
 final class StoreTests: XCTestCase {
-
+    
     var register = Register()
-
+    
     override func setUpWithError() throws {
         register = Register()
     }
-
+    
     override func tearDownWithError() throws { }
-
+    
     func testBaseline() throws {
         XCTAssertEqual("0.1", Store().version)
         XCTAssertEqual("Hello world", Store().helloWorld())
@@ -28,7 +28,7 @@ final class StoreTests: XCTestCase {
         
         let receipt = register.total()
         XCTAssertEqual(199, receipt.total())
-
+        
         let expectedReceipt = """
 Receipt:
 Beans (8oz Can): $1.99
@@ -56,7 +56,7 @@ TOTAL: $1.99
         
         let receipt = register.total()
         XCTAssertEqual(797, receipt.total())
-
+        
         let expectedReceipt = """
 Receipt:
 Beans (8oz Can): $1.99
@@ -87,5 +87,36 @@ TOTAL: $7.97
     func testDiscountNotAppliedToInvalidItems() {
         register.scan(Item(name: "Matcha", priceEach: 100000))
         XCTAssertEqual(100000, register.subtotal())
+    }
+    
+    // extra credit: tests for 2 for 1
+    func testTwoForOne() {
+        register.addPricingScheme(TwoForOneScheme(itemName: "Beans (8oz Can)"))
+        
+        register.scan(Item(name: "Beans (8oz Can)", priceEach: 199))
+        register.scan(Item(name: "Beans (8oz Can)", priceEach: 199))
+        register.scan(Item(name: "Beans (8oz Can)", priceEach: 199))
+    }
+
+    func testTwoForOneNotAppliedWithFewerItems() {
+        register.addPricingScheme(TwoForOneScheme(itemName: "Beans (8oz Can)"))
+        
+        register.scan(Item(name: "Beans (8oz Can)", priceEach: 199))
+        register.scan(Item(name: "Beans (8oz Can)", priceEach: 199))
+        
+        XCTAssertEqual(199 * 2, register.subtotal())
+    }
+
+    func testTwoForOneMultipleTimes() {
+        register.addPricingScheme(TwoForOneScheme(itemName: "Beans (8oz Can)"))
+        
+        register.scan(Item(name: "Beans (8oz Can)", priceEach: 199))
+        register.scan(Item(name: "Beans (8oz Can)", priceEach: 199))
+        register.scan(Item(name: "Beans (8oz Can)", priceEach: 199))
+        register.scan(Item(name: "Beans (8oz Can)", priceEach: 199))
+        register.scan(Item(name: "Beans (8oz Can)", priceEach: 199))
+        register.scan(Item(name: "Beans (8oz Can)", priceEach: 199))
+
+        XCTAssertEqual(199 * 4, register.subtotal())
     }
 }

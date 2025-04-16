@@ -12,6 +12,32 @@ protocol SKU {
     func price() -> Int
 }
 
+// extra credit: implemented 2 for 1 scheme
+protocol PricingScheme {
+    var itemName: String { get }
+    func applyDiscount(items: [SKU]) -> Int
+}
+
+class TwoForOneScheme: PricingScheme {
+    var itemName: String
+    
+    init(itemName: String) {
+        self.itemName = itemName
+    }
+    
+    func applyDiscount(items: [SKU]) -> Int {
+        let matchingItems = items.filter { $0.name == itemName }
+        
+        let freeItemCount = matchingItems.count / 3
+        
+        if freeItemCount > 0 && !matchingItems.isEmpty {
+            return freeItemCount * matchingItems[0].price()
+        } else {
+            return 0
+        }
+    }
+}
+
 class Item: SKU {
     let name: String
     var priceEach: Int
@@ -67,9 +93,15 @@ class Receipt {
 
 class Register {
     private var currentReceipt: Receipt
+    private var pricingSchemes: [PricingScheme]
 
     init() {
         self.currentReceipt = Receipt()
+        self.pricingSchemes = []
+    }
+    
+    func addPricingScheme(_ scheme: PricingScheme) {
+        pricingSchemes.append(scheme)
     }
 
     func scan(_ item: Item) {
@@ -78,12 +110,19 @@ class Register {
     }
 
     func subtotal() -> Int {
-        return currentReceipt.total()
+        let baseTotal = currentReceipt.total()
+        
+        let discount = pricingSchemes.reduce(0) { totalDiscount, scheme in
+            totalDiscount + scheme.applyDiscount(items: currentReceipt.items())
+        }
+        
+        return baseTotal - discount
     }
 
     func total() -> Receipt {
         let oldReceipt = currentReceipt
         currentReceipt = Receipt()
+        pricingSchemes = []
         return oldReceipt
     }
 }
